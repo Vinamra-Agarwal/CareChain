@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Analytics Dashboard - CareChain</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2em;
+        }
+
+        .back-btn {
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #2980b9;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .analytics-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .analytics-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            color: #7f8c8d;
+        }
+
+        .metric-value {
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .insights-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+
+        .insights-container h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+
+        .insight-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+            transition: all 0.3s;
+        }
+
+        .insight-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .insight-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .insight-type {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        .insight-confidence {
+            background: #27ae60;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            margin-left: auto;
+        }
+
+        .insight-description {
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .model-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s;
+        }
+
+        .model-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .model-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .model-name {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.2em;
+        }
+
+        .model-status {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .model-status.training {
+            background: rgba(241, 196, 15, 0.2);
+            color: #f39c12;
+        }
+
+        .model-status.active {
+            background: rgba(46, 204, 113, 0.2);
+            color: #27ae60;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+
+        .chart-container h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .chart {
+            height: 300px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7f8c8d;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-bars {
+            display: flex;
+            align-items: end;
+            height: 250px;
+            gap: 10px;
+            padding: 20px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: linear-gradient(to top, #3498db, #2ecc71);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            transition: all 0.3s;
+            min-height: 20px;
+        }
+
+        .chart-bar:hover {
+            opacity: 0.8;
+            transform: scale(1.05);
+        }
+
+        .chart-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.85em;
+            color: #7f8c8d;
+        }
+
+        .chart-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.85em;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 40px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 40px;
+        }
+
+        .empty-state .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .action-btn {
+            background: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .action-btn.secondary {
+            background: #27ae60;
+        }
+
+        .action-btn.secondary:hover {
+            background: #229954;
+        }
+
+        @media (max-width: 768px) {
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .models-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Healthcare Analytics Dashboard</h1>
+            <a href="/" class="back-btn">← Back to Dashboard</a>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-btn secondary" onclick="generateInsights()">
+                <span>💡</span>
+                Generate New Insights
+            </button>
+            <button class="action-btn" onclick="runAnalysis()">
+                <span>🔍</span>
+                Run Population Analysis
+            </button>
+            <button class="action-btn" onclick="refreshAnalytics()">
+                <span>🔄</span>
+                Refresh Data
+            </button>
+        </div>
+
+        <div class="analytics-grid">
+            <div class="analytics-card">
+                <h3><span>📈</span> Population Health Metrics</h3>
+                <div class="metric-row">
+                    <span class="metric-label">Average Heart Rate:</span>
+                    <span class="metric-value" id="avgHeartRate">Loading...</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Average Blood Pressure:</span>
+                    <span class="metric-value" id="avgBloodPressure">Loading...</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Average Glucose:</span>
+                    <span class="metric-value" id="avgGlucose">Loading...</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Risk Score:</span>
+                    <span class="metric-value" id="riskScore">Loading...</span>
+                </div>
+            </div>
+
+            <div class="analytics-card">
+                <h3><span>🤖</span> Federated Learning Status</h3>
+                <div class="metric-row">
+                    <span class="metric-label">Active Models:</span>
+                    <span class="metric-value" id="activeModels">Loading...</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Participating Hospitals:</span>
+                    <span class="metric-value" id="participatingHospitals">Loading...</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Training Rounds:</span>
+                    <span class="metric-value" id="trainingRounds">Loading...</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Model Accuracy:</span>
+                    <span class="metric-value" id="modelAccuracy">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="insights-container">
+            <h3>💡 Healthcare Insights</h3>
+            <div id="insightsList">
+                <div class="loading">Loading healthcare insights...</div>
+            </div>
+        </div>
+
+        <div class="models-grid">
+            <div class="model-card">
+                <div class="model-header">
+                    <div class="model-name">❤️ Heart Disease Prediction</div>
+                    <div class="model-status training">Training</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 85%"></div>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Accuracy:</span>
+                    <span class="metric-value">85.3%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Data Samples:</span>
+                    <span class="metric-value">15,420</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Last Updated:</span>
+                    <span class="metric-value">2 hours ago</span>
+                </div>
+            </div>
+
+            <div class="model-card">
+                <div class="model-header">
+                    <div class="model-name">🩸 Diabetes Risk Assessment</div>
+                    <div class="model-status active">Active</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 78%"></div>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Accuracy:</span>
+                    <span class="metric-value">78.9%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Data Samples:</span>
+                    <span class="metric-value">12,830</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Last Updated:</span>
+                    <span class="metric-value">5 hours ago</span>
+                </div>
+            </div>
+
+            <div class="model-card">
+                <div class="model-header">
+                    <div class="model-name">🫀 Cardiovascular Monitoring</div>
+                    <div class="model-status training">Training</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 65%"></div>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Accuracy:</span>
+                    <span class="metric-value">65.2%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Data Samples:</span>
+                    <span class="metric-value">8,950</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Last Updated:</span>
+                    <span class="metric-value">1 hour ago</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let analyticsData = null;
+        let ws = null;
+
+        // Sample insights data
+        const sampleInsights = [
+            {
+                type: "Population Health Trend",
+                confidence: "92%",
+                description: "Heart rate patterns show 15% improvement in cardiovascular health across Patient 001's monitoring period. Consistent exercise routine detected.",
+                timestamp: new Date()
+            },
+            {
+                type: "Risk Assessment",
+                confidence: "87%",
+                description: "Patient 002 shows elevated glucose levels trending upward. Recommend diabetes screening and dietary consultation.",
+                timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000)
+            },
+            {
+                type: "Federated Learning Update",
+                confidence: "95%",
+                description: "Global diabetes prediction model updated with privacy-preserved data from 3 hospitals. Accuracy improved to 85.3%.",
+                timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000)
+            },
+            {
+                type: "Anomaly Detection",
+                confidence: "78%",
+                description: "Unusual blood pressure pattern detected in morning readings. May indicate medication timing adjustment needed.",
+                timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000)
+            },
+            {
+                type: "Treatment Efficacy",
+                confidence: "91%",
+                description: "Current treatment protocol showing positive outcomes. Patient vitals stabilizing within normal ranges.",
+                timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000)
+            }
+        ];
+
+        // WebSocket connection
+        function connectWebSocket() {
+            const wsUrl = `ws://${window.location.host}/ws/analytics_user`;
+            ws = new WebSocket(wsUrl);
+
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                handleWebSocketMessage(data);
+            };
+
+            ws.onopen = function() {
+                console.log('Analytics WebSocket connected');
+            };
+
+            ws.onclose = function() {
+                console.log('Analytics WebSocket disconnected');
+                setTimeout(connectWebSocket, 5000);
+            };
+        }
+
+        function handleWebSocketMessage(data) {
+            switch(data.event) {
+                case 'healthcare_insight':
+                    addNewInsight(data.data);
+                    break;
+                default:
+                    console.log('Unknown analytics event:', data);
+            }
+        }
+
+        async function fetchAnalytics() {
+            try {
+                // Simulate API call - replace with actual endpoint
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Update metrics with simulated data
+                updateAnalyticsDisplay({
+                    avgHeartRate: Math.floor(Math.random() * 20) + 65,
+                    avgBloodPressure: Math.floor(Math.random() * 30) + 110,
+                    avgGlucose: Math.floor(Math.random() * 40) + 80,
+                    riskScore: (Math.random() * 0.3 + 0.1).toFixed(2),
+                    activeModels: 3,
+                    participatingHospitals: Math.floor(Math.random() * 3) + 2,
+                    trainingRounds: Math.floor(Math.random() * 10) + 15,
+                    modelAccuracy: (Math.random() * 0.2 + 0.75).toFixed(1)
+                });
+
+            } catch (error) {
+                console.error('Error fetching analytics:', error);
+            }
+        }
+
+        function updateAnalyticsDisplay(data) {
+            document.getElementById('avgHeartRate').textContent = `${data.avgHeartRate} bpm`;
+            document.getElementById('avgBloodPressure').textContent = `${data.avgBloodPressure} mmHg`;
+            document.getElementById('avgGlucose').textContent = `${data.avgGlucose} mg/dL`;
+            document.getElementById('riskScore').textContent = data.riskScore;
+            
+            document.getElementById('activeModels').textContent = data.activeModels;
+            document.getElementById('participatingHospitals').textContent = data.participatingHospitals;
+            document.getElementById('trainingRounds').textContent = data.trainingRounds;
+            document.getElementById('modelAccuracy').textContent = `${data.modelAccuracy}%`;
+        }
+
+        function displayInsights() {
+            const insightsList = document.getElementById('insightsList');
+            
+            if (sampleInsights.length === 0) {
+                insightsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">💡</div>
+                        <p>No insights generated yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            insightsList.innerHTML = sampleInsights.map(insight => `
+                <div class="insight-item">
+                    <div class="insight-header">
+                        <div class="insight-type">${insight.type}</div>
+                        <div class="insight-confidence">${insight.confidence}</div>
+                    </div>
+                    <div class="insight-description">${insight.description}</div>
+                    <div style="margin-top: 10px; font-size: 0.85em; color: #95a5a6;">
+                        Generated: ${insight.timestamp.toLocaleString()}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addNewInsight(insightData) {
+            const newInsight = {
+                type: "Real-time Analysis",
+                confidence: "89%",
+                description: `New healthcare pattern detected: ${JSON.stringify(insightData.insights).substring(0, 100)}...`,
+                timestamp: new Date()
+            };
+
+            sampleInsights.unshift(newInsight);
+            
+            // Keep only last 10 insights
+            if (sampleInsights.length > 10) {
+                sampleInsights.pop();
+            }
+
+            displayInsights();
+        }
+
+        function generateInsights() {
+            const newInsightTypes = [
+                "Predictive Analysis",
+                "Trend Detection", 
+                "Risk Assessment",
+                "Treatment Response",
+                "Population Screening"
+            ];
+
+            const newInsight = {
+                type: newInsightTypes[Math.floor(Math.random() * newInsightTypes.length)],
+                confidence: Math.floor(Math.random() * 20 + 75) + "%",
+                description: `Generated insight: ${Math.random() > 0.5 ? 'Positive health indicators detected' : 'Potential risk factors identified'} based on recent patient data analysis. Recommendation: Continue monitoring and review in 24 hours.`,
+                timestamp: new Date()
+            };
+
+            sampleInsights.unshift(newInsight);
+            
+            if (sampleInsights.length > 10) {
+                sampleInsights.pop();
+            }
+
+            displayInsights();
+            
+            // Show success message
+            alert("✅ New healthcare insight generated successfully!");
+        }
+
+        function runAnalysis() {
+            // Simulate analysis
+            alert("🔍 Running population health analysis...\n\nAnalyzing:\n- Patient vitals trends\n- Risk factor correlations\n- Treatment effectiveness\n- Predictive modeling\n\nResults will appear in insights within 2-3 minutes.");
+            
+            // Simulate delayed insight
+            setTimeout(() => {
+                const analysisInsight = {
+                    type: "Population Analysis Complete",
+                    confidence: "94%",
+                    description: "Analysis of 2 patients over past 24 hours shows: Average heart rate 72 bpm (normal), glucose levels stable, 1 patient may need blood pressure monitoring. Overall population health: Good.",
+                    timestamp: new Date()
+                };
+                
+                sampleInsights.unshift(analysisInsight);
+                if (sampleInsights.length > 10) {
+                    sampleInsights.pop();
+                }
+                displayInsights();
+            }, 3000);
+        }
+
+        function refreshAnalytics() {
+            fetchAnalytics();
+            
+            // Update chart with new data
+            const bars = document.querySelectorAll('.chart-bar');
+            bars.forEach(bar => {
+                const newHeight = Math.floor(Math.random() * 60 + 30) + '%';
+                bar.style.height = newHeight;
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            connectWebSocket();
+            fetchAnalytics();
+            displayInsights();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(fetchAnalytics, 30000);
+            
+            // Update chart periodically
+            setInterval(() => {
+                const bars = document.querySelectorAll('.chart-bar');
+                bars.forEach(bar => {
+                    const currentHeight = parseInt(bar.style.height);
+                    const variation = Math.floor(Math.random() * 10 - 5); // -5 to +5
+                    const newHeight = Math.max(20, Math.min(90, currentHeight + variation));
+                    bar.style.height = newHeight + '%';
+                });
+            }, 10000);
+        });
+    </script>
+</body>
+</html>
